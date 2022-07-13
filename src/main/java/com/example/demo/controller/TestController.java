@@ -19,6 +19,7 @@ public class TestController {
 
     @ApiOperation(value = "hello")
     @PostMapping("hello")
+    //在执行前先检查是否具有hello权限
     @PreAuthorize("hasAuthority('hello')")
     public R hello() {
         return R.ok().data("hello", "hello");
@@ -26,6 +27,7 @@ public class TestController {
 
     @ApiOperation(value = "manage")
     @PostMapping("manage")
+    //在执行前先检查是否具有manage权限
     @PreAuthorize("hasAuthority('manage')")
     public R manage() {
         return R.ok().data("manage", "manage");

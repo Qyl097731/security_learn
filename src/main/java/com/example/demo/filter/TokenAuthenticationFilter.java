@@ -44,31 +44,32 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
 
         UsernamePasswordAuthenticationToken authentication = null;
+        // 获取redis中的用户信息
         authentication = getAuthentication(req);
-
+        // 已经登录就获取信息 放入安全信息上下文
         if (authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
+            // 未登录就出错
             ResponseUtil.out(res, R.error());
         }
         chain.doFilter(req, res);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        // token置于header里
-        String token = request.getHeader("token");
-        if (token != null && !"".equals(token.trim())) {
-            String userName = tokenManager.getUserFromToken(token);
-
+        String token = request.getHeader("token");         // 获取header里token值
+        if (token != null && !"".equals(token.trim())) {        // 如果有token值
+            String userName = tokenManager.getUserFromToken(token); //根据token获取username
+            //根据token获取permissions
             List<String> permissionValueList = (List<String>) redisTemplate.opsForValue().get(userName);
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            Collection<GrantedAuthority> authorities = new ArrayList<>();          // 把权限封装成指定形式的集合
             for(String permissionValue : permissionValueList) {
                 if(StringUtils.isEmpty(permissionValue)) continue;
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(permissionValue);
                 authorities.add(authority);
             }
 
-            if (!StringUtils.isEmpty(userName)) {
+            if (!StringUtils.isEmpty(userName)) {    // 把有用信息塞入UsernamePasswordAuthenticationToken后返回
                 return new UsernamePasswordAuthenticationToken(userName, token, authorities);
             }
             return null;

@@ -7,6 +7,7 @@ import com.example.demo.security.TokenLogoutHandler;
 import com.example.demo.security.TokenManager;
 import com.example.demo.security.UnauthorizedEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,6 +17,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * <p>
@@ -27,12 +30,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)      //prePostEnabled = true 解锁 @PreAuthority 和 @PostAuthority，以此可以实现权限的校验
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    //自定义查询数据库用户名密码和权限信息
     private UserDetailsService userDetailsService;
+    //token 管理工具类（生成 token）
     private TokenManager tokenManager;
+    //密码管理工具类
     private DefaultPasswordEncoder defaultPasswordEncoder;
+    //redis 操作工具类
     private RedisTemplate redisTemplate;
 
     @Autowired
@@ -53,11 +60,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.exceptionHandling()
-                .authenticationEntryPoint(new UnauthorizedEntryPoint())
-                .and().csrf().disable()
+                .authenticationEntryPoint(new UnauthorizedEntryPoint())    //统一异常处理： 没权限直接抛出，不再默认跳转到登录页面
+                .and().csrf().disable()                      // 关闭跨站请求伪造
                 .authorizeRequests()
-                .anyRequest().authenticated()
-                .and().addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))
+//                .antMatchers("/login","/toLogin").permitAll()   与login toLogin匹配的可以放行
+                .anyRequest().authenticated()               // 所有的请求都要进行验证
+                .and().addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))  // filter链中增加登录过滤、授权过滤
                 .addFilter(new TokenAuthenticationFilter(authenticationManager(), tokenManager, redisTemplate)).httpBasic();
     }
 
@@ -69,6 +77,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //设置自己定义的userDetailsService来实现去数据库查询账号密码，来进行信息比对
+        //设置自己的密码处理defaultPasswordEncoder
+        //推荐BCryptPasswordEncoder()
         auth.userDetailsService(userDetailsService).passwordEncoder(defaultPasswordEncoder);
     }
 
@@ -80,6 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) throws Exception {
+        // 哪些web请求可以直接放行 不需要拦截
         web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**");
     }
 }
