@@ -7,6 +7,7 @@ import com.example.demo.security.TokenLogoutHandler;
 import com.example.demo.security.TokenManager;
 import com.example.demo.security.UnauthorizedEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,6 +17,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * <p>
@@ -27,21 +30,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)      //prePostEnabled = true 解锁 @PreAuthority 和 @PostAuthority，以此可以实现权限的校验
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    //自定义查询数据库用户名密码和权限信息
     private UserDetailsService userDetailsService;
-    private TokenManager tokenManager;
-    private DefaultPasswordEncoder defaultPasswordEncoder;
-    private RedisTemplate redisTemplate;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService, DefaultPasswordEncoder defaultPasswordEncoder,
-                          TokenManager tokenManager, RedisTemplate redisTemplate) {
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.defaultPasswordEncoder = defaultPasswordEncoder;
-        this.tokenManager = tokenManager;
-        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -50,16 +47,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * @param http
      * @throws Exception
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.exceptionHandling()
-                .authenticationEntryPoint(new UnauthorizedEntryPoint())
-                .and().csrf().disable()
-                .authorizeRequests()
-                .anyRequest().authenticated()
-                .and().addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))
-                .addFilter(new TokenAuthenticationFilter(authenticationManager(), tokenManager, redisTemplate)).httpBasic();
-    }
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.csrf().disable()                      // 关闭跨站请求伪造
+//                .authorizeRequests()
+//                .antMatchers("/login","/toLogin","/register").permitAll()   //与login toLogin匹配的可以放行
+//                .anyRequest().authenticated();               // 所有的请求都要进行验证
+//    }
 
     /**
      * 密码处理
@@ -69,7 +63,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(defaultPasswordEncoder);
+        auth.userDetailsService(userDetailsService).passwordEncoder(BCryptPasswordEncoder());
+    }
+
+
+    /**
+     * 注入密码的处理器
+     */
+    @Bean
+    public PasswordEncoder BCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     /**
@@ -80,6 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) throws Exception {
+        // 哪些web请求可以直接放行 不需要拦截
         web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**");
     }
 }
