@@ -16,9 +16,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * <p>
@@ -31,7 +45,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)      //prePostEnabled = true 解锁 @PreAuthority 和 @PostAuthority，以此可以实现权限的校验
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig<S extends Session> extends WebSecurityConfigurerAdapter {
 
     //自定义查询数据库用户名密码和权限信息
     private UserDetailsService userDetailsService;
@@ -41,6 +55,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private DefaultPasswordEncoder defaultPasswordEncoder;
     //redis 操作工具类
     private RedisTemplate redisTemplate;
+
+
+    @Bean
+    public SessionRegistry getSessionRegistry(){
+        SessionRegistry sessionRegistry=new SessionRegistryImpl();
+        return sessionRegistry;
+    }
+
+
 
     @Autowired
     public SecurityConfig(UserDetailsService userDetailsService, DefaultPasswordEncoder defaultPasswordEncoder,
@@ -59,14 +82,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.exceptionHandling()
-                .authenticationEntryPoint(new UnauthorizedEntryPoint())    //统一异常处理： 没权限直接抛出，不再默认跳转到登录页面
+        http.formLogin().loginPage("/login.html").loginProcessingUrl("/login").permitAll().successForwardUrl("/test/hello")
                 .and().csrf().disable()                      // 关闭跨站请求伪造
                 .authorizeRequests()
-//                .antMatchers("/login","/toLogin").permitAll()   与login toLogin匹配的可以放行
+                .antMatchers("/login","/toLogin").permitAll()   //与login toLogin匹配的可以放行
                 .anyRequest().authenticated()               // 所有的请求都要进行验证
                 .and().addFilter(new TokenLoginFilter(authenticationManager(), tokenManager, redisTemplate))  // filter链中增加登录过滤、授权过滤
                 .addFilter(new TokenAuthenticationFilter(authenticationManager(), tokenManager, redisTemplate)).httpBasic();
+        http.sessionManagement((sessionManagement) -> sessionManagement
+                .maximumSessions(2)
+        );
     }
 
     /**
@@ -94,4 +119,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 哪些web请求可以直接放行 不需要拦截
         web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**");
     }
+
 }

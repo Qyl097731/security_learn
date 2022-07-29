@@ -1,13 +1,11 @@
 package com.example.demo.filter;
 
-import com.example.demo.entity.User;
 import com.example.demo.utils.R;
 import com.example.demo.utils.ResponseUtil;
 import com.example.demo.security.TokenManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,7 +44,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
 
         UsernamePasswordAuthenticationToken authentication = null;
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // 获取redis中的用户信息
         authentication = getAuthentication(req);
         // 已经登录就获取信息 放入安全信息上下文
@@ -73,23 +70,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
                 return new UsernamePasswordAuthenticationToken(userName, token, authorities);
             }
             return null;
-        }
-        return null;
-    }
-
-    private UsernamePasswordAuthenticationToken getAuthenticationBySession(HttpServletRequest request){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if(auth != null){
-            User user = (User)auth.getPrincipal();
-            String userName = user.getUsername();
-            List<String> permissionValueList = (List<String>) redisTemplate.opsForValue().get(userName);
-            Collection<GrantedAuthority> authorities = new ArrayList<>();          // 把权限封装成指定形式的集合
-            for(String permissionValue : permissionValueList) {
-                if(StringUtils.isEmpty(permissionValue)) continue;
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(permissionValue);
-                authorities.add(authority);
-            }
-            return new UsernamePasswordAuthenticationToken(userName, user.getPassword(), authorities);
         }
         return null;
     }
