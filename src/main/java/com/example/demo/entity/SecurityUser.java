@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +43,9 @@ public class SecurityUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for(String permissionValue : permissionValueList) {
-            if(StringUtils.isEmpty(permissionValue)) continue;
+            if(Strings.isNullOrEmpty(permissionValue)) {
+                continue;
+            }
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority(permissionValue);
             authorities.add(authority);
         }

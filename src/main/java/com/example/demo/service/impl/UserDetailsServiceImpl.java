@@ -1,7 +1,9 @@
 package com.example.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.entity.SecurityUser;
 import com.example.demo.entity.User;
+import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.PermissionService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -22,9 +24,8 @@ import java.util.List;
 
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
-
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Autowired
     private PermissionService permissionService;
@@ -37,7 +38,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 从数据库中取出用户信息
-        User user = userService.selectByUsername(username);
+        QueryWrapper<User> wrapper = new QueryWrapper<User>().eq("username", username);
+        User user = userMapper.selectOne(wrapper);
 
         // 判断用户是否存在
         if (null == user){

@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: security_demo
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -11,9 +15,7 @@ spring:
     username: root
     password: root
 
-  thymeleaf:
-    enabled: false
-    prefix: classpath:/templates/
+
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
