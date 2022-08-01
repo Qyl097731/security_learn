@@ -38,27 +38,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //自定义登录页面地址
         http.formLogin().loginPage("/login.html")
-                //登录的请求地址
-                .loginProcessingUrl("/login")
-                //成功登录之后跳转的地址
-                .successForwardUrl("/user/manage")
+                .loginProcessingUrl("/login")                 //登录的请求地址
+                .successForwardUrl("/user/manage")                 //成功登录之后跳转的地址
                 .permitAll()
                 .and().csrf().disable()
-                // 放行哪些请求
                 .authorizeRequests()
-                .antMatchers("/login","/register").permitAll()
-                // 除了上述请求都进行拦截校验
-                .anyRequest().authenticated()
-                // 设置后 从数据库查询数据
-                .and().userDetailsService(userDetailsService)
-        .httpBasic();
+                .antMatchers("/login","/register").permitAll()                 // 放行哪些请求
+                .anyRequest().authenticated()                 // 除了上述请求都进行拦截校验
+                .and().userDetailsService(userDetailsService)                 // 设置后 从数据库查询数据
+                .httpBasic();
         return http.build();
     }
 
     @Bean
     /**
      * BCryptPasswordEncoder 官方推荐的密码加密规则
-     * 采用SHA-256 +随机盐+密钥对明文密码进行加密。SHA系列是Hash算法，不是加密算法，使用加密算法意味着可以解密（这个与编码/解码一样），但是采用Hash处理，其过程是不可逆的。
+     * 采用SHA-256 +随机盐+密钥对明文密码进行加密。SHA系列是Hash算法，
+     * 不是加密算法，使用加密算法意味着可以解密（这个与编码/解码一样），但是采用Hash处理，其过程是不可逆的。
      * 每次密码加密结果都不一致，且不存在解密
      * 用了SecureRandom 是对 Random的一种扩展
      * SecureRandom类收集了一些随机事件，比如鼠标点击，键盘点击等等，SecureRandom 使用这些随机事件作为种子 所以种子不可预测

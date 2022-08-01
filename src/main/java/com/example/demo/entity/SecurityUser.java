@@ -40,6 +40,9 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
+    /**
+     * 权限的存储
+     */
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for(String permissionValue : permissionValueList) {
