@@ -3,6 +3,7 @@ package com.example.demo.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -38,14 +39,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //自定义登录页面地址
         http.formLogin().loginPage("/login.html")
-                .loginProcessingUrl("/login")                 //登录的请求地址
-                .successForwardUrl("/user/manage")                 //成功登录之后跳转的地址
-                .permitAll()
+                .loginProcessingUrl("/login").permitAll()                 //登录的请求地址
+                .successForwardUrl("/user/info")                 //成功登录之后跳转的地址
                 .and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login","/register").permitAll()                 // 放行哪些请求
+                .antMatchers("/login","/register","/toLogin").permitAll()                 // 放行哪些请求
                 .anyRequest().authenticated()                 // 除了上述请求都进行拦截校验
-                .and().userDetailsService(userDetailsService)                 // 设置后 从数据库查询数据
+                .and().userDetailsService(userDetailsService)// 设置后 从数据库查询数据
                 .httpBasic();
         return http.build();
     }
@@ -79,6 +79,6 @@ public class SecurityConfig {
      */
     public WebSecurityCustomizer webSecurityCustomizer() {
         // 哪些web请求可以直接放行 不需要拦截
-        return (web) -> web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/register.html","/login.html");
+        return (web) -> web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**","/register.html");
     }
 }

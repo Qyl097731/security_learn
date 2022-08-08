@@ -1,15 +1,14 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
-import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 
@@ -19,7 +18,7 @@ import java.util.Date;
  * @Description 登录
  * @createTime 2022-07-28 09:34
  */
-@RestController
+@Controller
 public class IndexController {
 
     @Autowired
@@ -28,6 +27,7 @@ public class IndexController {
     @Autowired
     private UserService userService;
 
+    @ResponseBody
     @PostMapping("/register")
     public R register(User user){
         if(null != userService.selectByUsername(user.getUsername())){
@@ -39,5 +39,11 @@ public class IndexController {
         userService.save(user);
         return R.ok().message("注册成功");
     }
+
+    @GetMapping("/toLogin")
+    public String toLogin(){
+        return "login";
+    }
+
 }
 
