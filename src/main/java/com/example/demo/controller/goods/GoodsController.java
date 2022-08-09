@@ -3,7 +3,7 @@ package com.example.demo.controller.goods;
 import com.example.demo.utils.R;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoodsController {
 
     @ApiOperation(value = "manage")
-    @PostMapping("manage")
+    @GetMapping("manage")
     //在执行前先检查是否具有manage权限
     @PreAuthorize("hasAuthority('goods.manage')")
     public R manage() {
