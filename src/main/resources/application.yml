@@ -15,9 +15,6 @@ spring:
     username: root
     password: root
 
-  session:
-    store-type: redis
-
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8

@@ -48,11 +48,11 @@ public class SecurityConfig {
                 .successForwardUrl("/session")                 //成功登录之后跳转的地址
                 .and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login","/register","/toLogin").permitAll()                 // 放行哪些请求
+                .antMatchers("/login", "/register", "/toLogin").permitAll()                 // 放行哪些请求
                 .anyRequest().authenticated()                 // 除了上述请求都进行拦截校验
                 .and().userDetailsService(userDetailsService)// 设置后 从数据库查询数据
-                .addFilter(new TokenLoginFilter(authenticationManager(),redisTemplate))
-                .addFilter(new TokenAuthenticationFilter(authenticationManager(),redisTemplate))
+                .addFilter(new TokenLoginFilter(authenticationManager(), redisTemplate))        // 自定义在登录之后存权限
+                .addFilter(new TokenAuthenticationFilter(authenticationManager(), redisTemplate))// 自定义验证过滤器 session是否存在
                 .httpBasic();
         return http.build();
     }
@@ -86,6 +86,6 @@ public class SecurityConfig {
      */
     public WebSecurityCustomizer webSecurityCustomizer() {
         // 哪些web请求可以直接放行 不需要拦截
-        return (web) -> web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**","/register.html","/login.html");
+        return (web) -> web.ignoring().antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/register.html", "/login.html");
     }
 }
