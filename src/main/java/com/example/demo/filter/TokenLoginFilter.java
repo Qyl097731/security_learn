@@ -68,7 +68,7 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication auth){
         HttpSession session = req.getSession();
         SecurityUser user = (SecurityUser) auth.getPrincipal();
-        redisTemplate.opsForValue().set(session.getId(), user.getPermissionValueList());
+        redisTemplate.opsForValue().set(session.getId(), user.getPermissionValueList());   // 以Session ： 权限列表形式 存入redis
         ResponseUtil.out(res, R.ok().message("登录成功"));
     }
 

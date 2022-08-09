@@ -36,9 +36,7 @@ public class UserController {
     //在执行前先检查是否具有manage权限
     @PreAuthorize("hasAuthority('user.info')")
     public R info() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUser user = (SecurityUser) authentication.getPrincipal();
-        return R.ok().data("user",user);
+        return R.ok().message("user info");
     }
 
 }

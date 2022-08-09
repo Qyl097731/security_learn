@@ -54,19 +54,21 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String sessionId = session.getId();
+        // 从redis中获取权限
         Object object = redisTemplate.opsForValue().get(sessionId);
         if (Objects.nonNull(object)) {
             List<String> permissionValueList = (List<String>)object ;
-            Collection<GrantedAuthority> authorities = new ArrayList<>();          // 把权限封装成指定形式的集合
+            Collection<GrantedAuthority> authorities = new ArrayList<>();             // 把权限封装成指定形式的集合
             for(String permissionValue : permissionValueList) {
                 if(Strings.isNullOrEmpty(permissionValue)) {
                     continue;
                 }
+                // SimpleGrantedAuthority 权限内容为String 将String类型的权限存入SimpleGrantedAuthority类
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(permissionValue);
                 authorities.add(authority);
             }
-
             // 把有用信息塞入UsernamePasswordAuthenticationToken后返回
+            // UsernamePasswordAuthenticationToken令牌存了sessionid 和 权限
             return new UsernamePasswordAuthenticationToken(session.getId(),null , authorities);
         }
         return null;
