@@ -1,15 +1,22 @@
 package com.example.demo.controller.user;
 
+import com.example.demo.entity.SecurityUser;
 import com.example.demo.utils.R;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author qyl
@@ -22,10 +29,10 @@ import java.util.Map;
 public class UserController {
 
     @Autowired
-    FindByIndexNameSessionRepository sessionRepository;
+    private RedisTemplate redisTemplate;
 
     @ApiOperation(value = "manage")
-    @PostMapping("manage")
+    @GetMapping("manage")
     //在执行前先检查是否具有manage权限
     @PreAuthorize("hasAuthority('user.manage')")
     public R manage() {
@@ -33,12 +40,13 @@ public class UserController {
     }
 
     @ApiOperation(value = "info")
-    @PostMapping("info")
+    @GetMapping("info")
     //在执行前先检查是否具有manage权限
-//    @PreAuthorize("hasAuthority('user.info')")
+    @PreAuthorize("hasAuthority('user.info')")
     public R info() {
-        Map admin = sessionRepository.findByPrincipalName("spring:session:index:org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME");
-        return R.ok().data("admin", admin);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityUser user = (SecurityUser) authentication.getPrincipal();
+        return R.ok().data("user",user);
     }
 
 }
