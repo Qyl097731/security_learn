@@ -5,6 +5,7 @@ import com.example.demo.entity.SecurityUser;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.PermissionService;
+import com.example.demo.service.RoleService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -29,6 +31,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private PermissionService permissionService;
+
+    @Autowired
+    private RoleService roleService;
 
     /***
      * 根据账号获取用户信息
@@ -51,6 +56,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         // 获取用户信息之后，以UserDetails形式返回
         // SecurityUser ==> User + List<Permissions>
         List<String> authorities = permissionService.selectPermissionValueByUserId(user.getId());
+        List<String> role = roleService.listRolesByUserId(user.getId());
+        authorities.addAll(role);
         SecurityUser securityUser = new SecurityUser(curUser);
         securityUser.setPermissionValueList(authorities);
         return securityUser;

@@ -18,11 +18,13 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import java.time.Duration;
 
 @EnableCaching //开启缓存
 @Configuration  //配置类
+@EnableRedisHttpSession
 public class RedisConfig extends CachingConfigurerSupport {
 
     @Bean

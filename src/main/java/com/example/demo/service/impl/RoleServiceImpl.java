@@ -25,4 +25,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
+    @Override
+    public List<String> listRolesByUserId(String userId) {
+        return baseMapper.listRolesByUserId(userId);
+    }
 }

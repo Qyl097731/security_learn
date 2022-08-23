@@ -21,13 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/user")
-@PreAuthorize("hasAnyAuthority('ROLE_user')")
+@PreAuthorize("hasRole('ROLE_system')")
 public class UserController {
 
     @ApiOperation(value = "manage")
     @GetMapping("manage")
     //在执行前先检查是否具有manage权限
-    @PreAuthorize("hasAuthority('user.manage')")
     public R manage() {
         return R.ok().data("msg", "user manage");
     }
@@ -35,7 +34,6 @@ public class UserController {
     @ApiOperation(value = "info")
     @GetMapping("info")
     //在执行前先检查是否具有manage权限
-    @PreAuthorize("hasAuthority('user.info')")
     public R info() {
         return R.ok().message("user info");
     }

@@ -15,4 +15,5 @@ import java.util.Map;
  * @since 2022-7-09
  */
 public interface RoleService extends IService<Role> {
+    List<String> listRolesByUserId(String userId);
 }
