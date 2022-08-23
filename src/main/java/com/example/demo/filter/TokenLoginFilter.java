@@ -1,5 +1,6 @@
 package com.example.demo.filter;
 
+import com.example.demo.bean.RedisBean;
 import com.example.demo.entity.SecurityUser;
 import com.example.demo.entity.User;
 import com.example.demo.utils.R;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * <p>
@@ -68,7 +70,8 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication auth){
         HttpSession session = req.getSession();
         SecurityUser user = (SecurityUser) auth.getPrincipal();
-        redisTemplate.opsForValue().set(session.getId(), user.getPermissionValueList());   // 以Session ： 权限列表形式 存入redis
+        RedisBean redisBean = new RedisBean(user.getUsername(),user.getPermissionValueList());
+        redisTemplate.opsForValue().set(session.getId(), redisBean);   // 以Session ： admin 、 权限 存入redis
         ResponseUtil.out(res, R.ok().message("登录成功"));
     }
 
@@ -82,7 +85,7 @@ public class TokenLoginFilter extends UsernamePasswordAuthenticationFilter {
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                              AuthenticationException e) throws IOException, ServletException {
+                                              AuthenticationException e){
         ResponseUtil.out(response, R.error());
     }
 }

@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.bean.CustomerExpiredSessionStrategy;
 import com.example.demo.filter.TokenAuthenticationFilter;
 import com.example.demo.filter.TokenLoginFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.SessionInformationExpiredEvent;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author qyl
@@ -37,6 +44,9 @@ public class SecurityConfig {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private CustomerExpiredSessionStrategy sessionStrategy;
+
     @Bean
     /**
      * 新版本配置
@@ -54,8 +64,13 @@ public class SecurityConfig {
                 .addFilter(new TokenLoginFilter(authenticationManager(), redisTemplate))        // 自定义在登录之后存权限
                 .addFilter(new TokenAuthenticationFilter(authenticationManager(), redisTemplate))// 自定义验证过滤器 session是否存在
                 .httpBasic();
+        // 这里并发登录的策略
+        http.sessionManagement().maximumSessions(1)
+                .expiredSessionStrategy(sessionStrategy);
         return http.build();
     }
+
+
 
     @Bean
     /**

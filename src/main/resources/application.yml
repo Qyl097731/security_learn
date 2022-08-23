@@ -19,6 +19,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 
+
   redis:
     database: 0
     host: 192.168.3.125
@@ -30,6 +31,9 @@ spring:
         min-idle: 0
     port: 6379
     timeout: 1800000
+
+  session:
+    store-type: redis
 
 mybatis-plus:
   configuration:

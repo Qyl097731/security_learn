@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/user")
+@PreAuthorize("hasAnyAuthority('ROLE_user')")
 public class UserController {
 
     @ApiOperation(value = "manage")

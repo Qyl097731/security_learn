@@ -1,5 +1,6 @@
 package com.example.demo.filter;
 
+import com.example.demo.bean.RedisBean;
 import com.google.common.base.Strings;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,7 +32,7 @@ import java.util.Objects;
 public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     private RedisTemplate redisTemplate;
 
-    public TokenAuthenticationFilter(AuthenticationManager authManager,RedisTemplate redisTemplate) {
+    public TokenAuthenticationFilter(AuthenticationManager authManager, RedisTemplate redisTemplate) {
         super(authManager);
         this.redisTemplate = redisTemplate;
     }
@@ -57,10 +57,11 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         // 从redis中获取权限
         Object object = redisTemplate.opsForValue().get(sessionId);
         if (Objects.nonNull(object)) {
-            List<String> permissionValueList = (List<String>)object ;
+            RedisBean redisBean = (RedisBean) object;
+            List<String> permissionValueList = redisBean.getPermissionValueList();
             Collection<GrantedAuthority> authorities = new ArrayList<>();             // 把权限封装成指定形式的集合
-            for(String permissionValue : permissionValueList) {
-                if(Strings.isNullOrEmpty(permissionValue)) {
+            for (String permissionValue : permissionValueList) {
+                if (Strings.isNullOrEmpty(permissionValue)) {
                     continue;
                 }
                 // SimpleGrantedAuthority 权限内容为String 将String类型的权限存入SimpleGrantedAuthority类
@@ -69,7 +70,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             }
             // 把有用信息塞入UsernamePasswordAuthenticationToken后返回
             // UsernamePasswordAuthenticationToken令牌存了sessionid 和 权限
-            return new UsernamePasswordAuthenticationToken(session.getId(),null , authorities);
+            return new UsernamePasswordAuthenticationToken(redisBean.getUsername(), null, authorities);
         }
         return null;
     }
