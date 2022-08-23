@@ -60,9 +60,9 @@ public class SecurityConfig {
                 .and().userDetailsService(userDetailsService)// 设置后 从数据库查询数据
                 .addFilter(new TokenLoginFilter(authenticationManager(), redisTemplate))        // 自定义在登录之后存权限
                 .addFilter(new TokenAuthenticationFilter(authenticationManager(), redisTemplate))// 自定义验证过滤器 session是否存在
-                .logout().addLogoutHandler(logoutHandler)
+                .logout().addLogoutHandler(logoutHandler)// 自定义退出
                 .and().httpBasic();
-        // 这里并发登录的策略
+        // 这里限制最多同时在线1个用户，否则就强制下线
         http.sessionManagement().maximumSessions(1)
                 .expiredSessionStrategy(sessionStrategy);
         return http.build();

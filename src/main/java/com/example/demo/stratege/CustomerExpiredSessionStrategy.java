@@ -21,8 +21,6 @@ import java.io.IOException;
  */
 @Component
 public class CustomerExpiredSessionStrategy implements SessionInformationExpiredStrategy {
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Override
     public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException, ServletException {
