@@ -70,6 +70,8 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             }
             // 把有用信息塞入UsernamePasswordAuthenticationToken后返回
             // UsernamePasswordAuthenticationToken令牌存了sessionid 和 权限
+            // 登录之后，已经将信息塞入到SecurityContextHolder 故不再需要redis存信息了
+            redisTemplate.delete(sessionId);
             return new UsernamePasswordAuthenticationToken(redisBean.getUsername(), null, authorities);
         }
         return null;

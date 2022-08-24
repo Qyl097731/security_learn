@@ -3,14 +3,11 @@ package com.example.demo.stratege;
 import com.example.demo.utils.R;
 import com.example.demo.utils.ResponseUtil;
 import com.example.demo.utils.ResultCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.web.session.SessionInformationExpiredEvent;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**

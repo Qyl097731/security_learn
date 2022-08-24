@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.entity.Permission;
 import com.example.demo.entity.RolePermission;
 import com.example.demo.entity.User;
-import com.example.demo.helper.MemuHelper;
-import com.example.demo.helper.PermissionHelper;
 import com.example.demo.mapper.PermissionMapper;
 import com.example.demo.service.PermissionService;
 import com.example.demo.service.RolePermissionService;
