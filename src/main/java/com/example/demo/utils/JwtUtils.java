@@ -1,5 +1,6 @@
 package com.example.demo.utils;
 
+import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -26,7 +27,7 @@ public class JwtUtils {
                 .setHeaderParam("typ", "JWT")
                 .setHeaderParam("alg", "HS256")
 
-                .setSubject("guli-user")
+                .setSubject("nsec-user")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
 
@@ -45,7 +46,9 @@ public class JwtUtils {
      * @return
      */
     public static boolean checkToken(String jwtToken) {
-        if(StringUtils.isEmpty(jwtToken)) return false;
+        if(Strings.isNullOrEmpty(jwtToken)) {
+            return false;
+        }
         try {
             Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
         } catch (Exception e) {
@@ -63,7 +66,9 @@ public class JwtUtils {
     public static boolean checkToken(HttpServletRequest request) {
         try {
             String jwtToken = request.getHeader("token");
-            if(StringUtils.isEmpty(jwtToken)) return false;
+            if(Strings.isNullOrEmpty(jwtToken)) {
+                return false;
+            }
             Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +84,9 @@ public class JwtUtils {
      */
     public static String getMemberIdByJwtToken(HttpServletRequest request) {
         String jwtToken = request.getHeader("token");
-        if(StringUtils.isEmpty(jwtToken)) return "";
+        if(Strings.isNullOrEmpty(jwtToken)) {
+            return "";
+        }
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(APP_SECRET).parseClaimsJws(jwtToken);
         Claims claims = claimsJws.getBody();
         return (String)claims.get("id");
