@@ -6,6 +6,9 @@ import com.example.demo.entity.Permission;
 import java.util.List;
 
 
+/**
+ * @author nsec
+ */
 public interface PermissionMapper extends BaseMapper<Permission> {
     /**
      * 根据用户id获取权限列表  权限 ：  role.permisson 故 已经起到了区分角色的作用

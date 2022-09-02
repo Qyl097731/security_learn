@@ -1,9 +1,8 @@
 package com.example.demo.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.entity.Permission;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import java.util.List;
 
@@ -24,4 +23,15 @@ public interface PermissionService extends IService<Permission> {
      * @return List<JSONObject>
      */
     List<String> selectPermissionValueByUserId(String id);
+
+    List<Permission> queryAllMenu();
+
+    void removeChildById(String id);
+
+    void saveRolePermissionRelationShip(String roleId, String[] permissionId);
+
+    List<Permission> listByRId(String roleId);
+
+
+    List<JSONObject> selectPermissionByUserId(String id);
 }

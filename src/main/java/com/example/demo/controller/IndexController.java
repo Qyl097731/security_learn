@@ -1,64 +1,54 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.User;
-//import com.example.demo.service.UserService;
-import com.example.demo.service.UserService;
-import com.example.demo.utils.R;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-
 /**
  * @author qyl
- * @program IndexController.java
- * @Description 登录
- * @createTime 2022-07-28 09:34
+ * @program indexController.java
+ * @createTime 2022-09-02 16:18
  */
+
+import com.alibaba.fastjson.JSONObject;
+import com.example.demo.service.IndexService;
+import com.example.demo.utils.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
 @RestController
+@RequestMapping("/nesc/index")
 public class IndexController {
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserService userService;
+    private IndexService indexService;
 
     /**
-     * @description 注册账号
-     * @param user
-     * @return R
-     * @author qyl
-     * @date 2022/8/9 11:17
+     * 根据token获取用户信息
      */
-    @PostMapping("/register")
-    public R register(User user){
-        if(null != userService.selectByUsername(user.getUsername())){
-            return R.error().message("用户已经存在");
-        }
-        user.setGmtCreate(new Date());
-        user.setGmtModified(new Date());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.save(user);
-        return R.ok().message("注册成功");
+    @GetMapping("info")
+    public R info(){
+        //获取当前登录用户用户名
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Map<String, Object> userInfo = indexService.getUserInfo(username);
+        return R.ok().data(userInfo);
     }
 
     /**
-     * @description 查看是否session共享
-     * @param request
-     * @return R
-     * @author qyl
-     * @date 2022/8/9 11:18
+     * 获取菜单
+     * @return
      */
-    @GetMapping("/session")
-    public R session(HttpServletRequest request) {
-        System.out.println("session: " + request.getSession().getId() + "  port: " + request.getServerPort());
-        return R.ok().message("session: " + request.getSession().getId() + "  port: " + request.getServerPort());
+    @GetMapping("menu")
+    public R getMenu() {
+        //获取当前登录用户用户名
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<JSONObject> permissionList = indexService.getMenu(username);
+        return R.ok().data("permissionList", permissionList);
     }
+
+    @PostMapping("logout")
+    public R logout(){
+        return R.ok();
+    }
+
 }
-
